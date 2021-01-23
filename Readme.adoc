@@ -1,3 +1,3 @@
 # Corona Jena
 
-Simple Julia Pluto script, downloads corona data from website of Jena, and visualizes it (also calculates 7-days-incidence).
+Simple Julia Pluto notebook, downloads corona data from website of Jena, and visualizes it (also calculates 7-days-incidence).
