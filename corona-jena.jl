@@ -26,13 +26,16 @@ jenaDataUrl = "https://opendata.jena.de/dataset/2cc7773d-beba-43ad-9808-a420a67f
 jenaDataPath = "data/corona-jena.csv"
 
 # ╔═╡ 3f805796-5d85-11eb-0f52-d9297b5e1803
-download(jenaDataUrl, jenaDataPath)
-
-# ╔═╡ 506fd03e-5cef-11eb-28e7-3bf919130655
-df = CSV.File(jenaDataPath) |> DataFrame
+begin
+	download(jenaDataUrl, jenaDataPath)
+	df = CSV.File(jenaDataPath) |> DataFrame
+end
 
 # ╔═╡ f21fa00a-5cef-11eb-097d-677d90a6a866
 days = unix2datetime.(df.zeit)
+
+# ╔═╡ 14d6da92-606e-11eb-0045-99f86ed39628
+lastUpdate = (time=unix2datetime(df.zeit[end]), infections=df.neu_erkrankte[end])
 
 # ╔═╡ fb849638-5cf0-11eb-29cc-51a4a787a806
 days2021 = [day for day in days if Dates.year(day) >= 2021]
@@ -61,18 +64,32 @@ Statistics.mean(ratio)
 # ╔═╡ 828566f2-5cf0-11eb-0eb2-ab71632ece9b
 sevenDaysIncidence = [sum(df.neu_erkrankte[i-6:i])/1.11434 for i in 7:length(df.zeit)]
 
-# ╔═╡ ed672170-5cef-11eb-0093-4973699ace66
-begin
-	plot(days, df.neu_erkrankte, fmt=png, legend=(0.15, 0.95), label="new infections", title="New Corona infections in Jena")
-	plot!(days[7:end], sevenDaysIncidence, label="7 days incidence")
-end
+# ╔═╡ e8f7e122-6230-11eb-321c-f14ebcb04ae3
+currentIncidence = sevenDaysIncidence[end]
+
+# ╔═╡ ca20bed2-6301-11eb-2790-e35382c404f8
+sevenDaysIncidence[end-1]
+
+# ╔═╡ d48f9292-6301-11eb-1908-dff593481617
+sevenDaysIncidence[end-7]
 
 # ╔═╡ b08f2eb0-5d00-11eb-3053-d5c6c3123740
 sevenDaysCorrected = sevenDaysIncidence .* correction
 
+# ╔═╡ 3ff6e226-64cc-11eb-3feb-a18306e336f4
+fourteenDaysIncidence = [sum(df.neu_erkrankte[i-13:i])/1.11434 for i in 14:length(df.zeit)]
+
+# ╔═╡ ed672170-5cef-11eb-0093-4973699ace66
+begin
+	plot(days, df.neu_erkrankte, fmt=png, legend=(0.15, 0.95), label="new infections", title="New Corona infections in Jena", )
+	plot!(days[7:end], sevenDaysIncidence, label="7 days incidence")
+	plot!(days[14:end], fourteenDaysIncidence, label="14 days incidence")
+	plot!(days, df.aktive_faelle, label="active cases")
+end
+
 # ╔═╡ 067024ea-5d87-11eb-127f-57bf165a065f
 md"""
-7-days-incidence reported on Jena website seems to be calculated with other (outdated?) population (something like `108'300`). here, we use the value from Thüringer Landesamt für Statistik of 2019, `111'434`. Hence, we also present corrected data (which estimates the 7-days-incidence Jena is publishing on it's website for that day).
+7-days-incidence reported on Jena website seems to be calculated with other population (something like `108'300`). here, we use the value from Thüringer Landesamt für Statistik of 2019, `111'434`. Hence, we also present corrected data (which estimates the 7-days-incidence Jena is publishing on it's website for that day).
 """
 
 # ╔═╡ d21cf31a-5cf0-11eb-2760-81a807d13292
@@ -88,23 +105,20 @@ begin
 	plot!(days, df.tote, label="deaths")
 end
 
-# ╔═╡ df072f64-5cf0-11eb-2cfe-5d0da9a04cf2
-
-
-# ╔═╡ a2741d5c-5cf0-11eb-2039-917a68296fa6
-
-
 # ╔═╡ Cell order:
 # ╠═23671914-5cef-11eb-2b76-8161d5326fc6
 # ╠═abb6c3be-5cef-11eb-3133-072602116ca7
 # ╠═30629c0e-5d85-11eb-1443-c179c474f226
 # ╠═4e0be99c-5d85-11eb-2ea1-f9ae70ed03ac
 # ╠═3f805796-5d85-11eb-0f52-d9297b5e1803
-# ╠═506fd03e-5cef-11eb-28e7-3bf919130655
 # ╠═e67b0672-5cef-11eb-0469-b1e7235b32ff
 # ╠═f21fa00a-5cef-11eb-097d-677d90a6a866
+# ╠═14d6da92-606e-11eb-0045-99f86ed39628
+# ╠═e8f7e122-6230-11eb-321c-f14ebcb04ae3
+# ╠═ca20bed2-6301-11eb-2790-e35382c404f8
+# ╠═d48f9292-6301-11eb-1908-dff593481617
 # ╠═4844cf8e-5cf0-11eb-3dc3-7dc0d8555dc1
-# ╟─ed672170-5cef-11eb-0093-4973699ace66
+# ╠═ed672170-5cef-11eb-0093-4973699ace66
 # ╠═fb849638-5cf0-11eb-29cc-51a4a787a806
 # ╠═28cf2994-5cf1-11eb-36e1-2526bc45ffdf
 # ╠═65f5978e-5cfd-11eb-2082-f3c64f6a276e
@@ -113,11 +127,10 @@ end
 # ╠═5a1b68ba-5cff-11eb-2bd6-99cb2bbf2284
 # ╠═7b3d22cc-5cff-11eb-23da-a363cf9adcfa
 # ╠═6641e4c4-5d87-11eb-3158-c5b917fb2b9a
-# ╟─b08f2eb0-5d00-11eb-3053-d5c6c3123740
+# ╠═b08f2eb0-5d00-11eb-3053-d5c6c3123740
 # ╠═9c64b37a-5cff-11eb-3d84-333daa0ceebc
-# ╟─828566f2-5cf0-11eb-0eb2-ab71632ece9b
+# ╠═828566f2-5cf0-11eb-0eb2-ab71632ece9b
+# ╠═3ff6e226-64cc-11eb-3feb-a18306e336f4
 # ╠═067024ea-5d87-11eb-127f-57bf165a065f
-# ╟─d21cf31a-5cf0-11eb-2760-81a807d13292
-# ╟─e2673e42-5cf0-11eb-0d79-19eb998d4633
-# ╠═df072f64-5cf0-11eb-2cfe-5d0da9a04cf2
-# ╠═a2741d5c-5cf0-11eb-2039-917a68296fa6
+# ╠═d21cf31a-5cf0-11eb-2760-81a807d13292
+# ╠═e2673e42-5cf0-11eb-0d79-19eb998d4633
